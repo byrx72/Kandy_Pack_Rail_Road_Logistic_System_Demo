@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import ProductImage from "./components/ProductImage";
 import { BusyLabel, LoadingState, Notice } from "./components/Feedback";
+import { CountUp, Reveal } from "./components/Reveal";
+import HeroVideo from "./components/HeroVideo";
+import JourneyStory from "./components/JourneyStory";
 import { readJson, errorText } from "./lib/api-response";
 import { useRouter } from "next/navigation";
 
@@ -36,6 +38,7 @@ export default function Home() {
   const [busy, setBusy] = useState(false);
   const submitting = useRef(false);
   const [receipt, setReceipt] = useState<Receipt | null>(null);
+  const [justAdded, setJustAdded] = useState("");
   const minDate = minimumDeliveryDate();
 
   useEffect(() => {
@@ -55,6 +58,7 @@ export default function Home() {
     return () => { live = false; controller.abort(); };
   }, [router, loadAttempt]);
 
+  const cartCount = items.reduce((n, i) => n + (i.productId && Number.isFinite(i.quantity) ? i.quantity : 0), 0);
   const total = items.reduce((sum, item) => sum + (products.find(p => p.productId === item.productId)?.price || 0) * (Number.isFinite(item.quantity) ? item.quantity : 0), 0);
   function changeItem(index: number, patch: Partial<Item>) {
     setItems(current => current.map((item, i) => i === index ? { ...item, ...patch } : item));
@@ -79,16 +83,17 @@ export default function Home() {
     finally { submitting.current = false; setBusy(false); }
   }
 
-  return <main className="shop-shell">
-    <section className="shop-hero"><div className="hero-copy"><span className="eyebrow">KANDY ORIGIN. ISLANDWIDE CONNECTIONS.</span><h1>Everyday essentials.<br /><em>Delivered with care.</em></h1><p>Order for your shop or business. Choose your products and delivery route, and let KandyPack plan the journey by rail and road.</p><a href="#catalog" className="primary-link">Browse the catalogue <span aria-hidden="true">→</span></a><div className="hero-detail">Wholesale & retail orders · Planned delivery</div></div><div className="hero-art"><Image src="/brand/distribution-hero.png" alt="Illustrative packaged goods prepared for distribution" fill sizes="(max-width: 640px) 100vw, 50vw" unoptimized preload /><div className="art-tag"><b>PACKED WITH CARE</b><span>Kandy → Rail → Road → Your business</span></div></div></section>
-    <div className="service-strip"><span><b>01</b> Choose your products</span><span><b>02</b> Plan your delivery</span><span><b>03</b> Follow your order</span></div>
-    <section id="catalog" className="catalog"><div className="section-heading"><div><span className="eyebrow">THE COLLECTION</span><h2>Stock up on everyday favourites</h2></div><label className="search-box"><span>Search products</span><input type="search" placeholder="Search by name or product ID" value={search} onChange={e => setSearch(e.target.value)} /></label></div>
+  return <main className="landing-page-root">
+    <HeroVideo productCount={products.length} routeCount={routes.length} loading={loading} />
+    <div id="journey"><JourneyStory /></div>
+    <div className="shop-shell">
+      <section id="catalog" className="catalog"><div className="section-heading"><div><span className="eyebrow">THE COLLECTION</span><h2>Stock up on everyday favourites</h2></div><label className="search-box"><span>Search products</span><input type="search" placeholder="Search by name or product ID" value={search} onChange={e => setSearch(e.target.value)} /></label></div>
     {loading && <LoadingState>Loading products and delivery routes...</LoadingState>}
     {loadError && <Notice kind="error">{loadError}<br /><button type="button" className="secondary-button" onClick={() => { setLoadError(""); setLoading(true); setLoadAttempt(value => value + 1); }}>Try again</button></Notice>}
-    <div className="product-grid">{products.filter(product => `${product.productName} ${product.productId}`.toLowerCase().includes(search.toLowerCase())).map(product => <article className="product-card" key={product.productId}><ProductImage productName={product.productName} /><div className="product-info"><span className="product-code">{product.productId}</span><h3>{product.productName}</h3><div className="product-bottom"><strong>Rs. {Number(product.price).toFixed(2)}</strong><button disabled={busy} type="button" aria-label={`Add ${product.productName} to order`} onClick={() => {setItems(current => { const existing = current.find(i => i.productId === product.productId); if (existing) return current.map(i => i.productId === product.productId ? {...i, quantity: i.quantity + 1} : i); const blank = current.findIndex(i => !i.productId); return blank >= 0 ? current.map((i, idx) => idx === blank ? {productId: product.productId, quantity: 1} : i) : [...current, {productId: product.productId, quantity: 1}]; }); document.getElementById("checkout")?.scrollIntoView({behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});}}>Add +</button></div></div></article>)}</div>
+    <div className="product-grid">{products.filter(product => `${product.productName} ${product.productId}`.toLowerCase().includes(search.toLowerCase())).map((product, idx) => <article className="product-card" style={{ animationDelay: `${Math.min(idx, 11) * 50}ms` }} key={product.productId}><ProductImage productName={product.productName} /><div className="product-info"><span className="product-code">{product.productId}</span><h3>{product.productName}</h3><div className="product-bottom"><strong>Rs. {Number(product.price).toFixed(2)}</strong><button disabled={busy} type="button" className={justAdded === product.productId ? "added" : ""} aria-label={`Add ${product.productName} to order`} onClick={() => {setJustAdded(product.productId); window.setTimeout(() => setJustAdded(""), 1200); setItems(current => { const existing = current.find(i => i.productId === product.productId); if (existing) return current.map(i => i.productId === product.productId ? {...i, quantity: i.quantity + 1} : i); const blank = current.findIndex(i => !i.productId); return blank >= 0 ? current.map((i, idx) => idx === blank ? {productId: product.productId, quantity: 1} : i) : [...current, {productId: product.productId, quantity: 1}]; }); document.getElementById("checkout")?.scrollIntoView({behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth", block: "start"});}}>{justAdded === product.productId ? "Added ✓" : "Add +"}</button></div></div></article>)}</div>
     {!loading && !loadError && !products.filter(product => `${product.productName} ${product.productId}`.toLowerCase().includes(search.toLowerCase())).length && <p className="empty-state">No products match your search.</p>}
     <p className="catalog-note">Sample product images are illustrative; actual brand packaging may differ. Names and prices are from the live catalogue.</p></section>
-    <div id="checkout" className="checkout-panel">
+    <Reveal><div id="checkout" className="checkout-panel">
       <span className="eyebrow">YOUR SELECTION</span><h2 className="text-2xl font-bold text-slate-800">Complete your order</h2>
       <p className="mt-2 text-sm text-slate-600">Choose products and the route covering your delivery address. We will reserve suitable trains automatically.</p>
       {loading ? <LoadingState>Preparing your order form...</LoadingState> : loadError ? <p className="empty-state">Please reload the catalogue using Try again above.</p> : <form aria-busy={busy} onSubmit={submit} className="mt-6 space-y-5">
@@ -117,9 +122,9 @@ export default function Home() {
             <input aria-label="Delivery date" type="date" required min={minDate} value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 p-3" />
             <span className="mt-1 block text-xs font-normal text-slate-500">At least seven days from today. All items must have suitable trains before delivery.</span>
           </label>
-          <p className="font-semibold">Estimated total: Rs. {total.toFixed(2)}</p>
+          <p className="font-semibold">Estimated total: <CountUp prefix="Rs. " value={total} decimals={2} /></p>
           <p className="text-xs text-slate-500">An order may use more than one train. The final allocation appears after you place the order.</p>
-          <button type="submit" disabled={loading || busy || !products.length || !routes.length} className="w-full rounded-lg bg-[#a91d40] p-3 font-medium text-white disabled:opacity-60">{busy ? <BusyLabel>Reserving your order...</BusyLabel> : "Place order"}</button>
+          <button type="submit" disabled={loading || busy || !products.length || !routes.length} className="w-full rounded-lg bg-[#1d4ed8] p-3 font-medium text-white disabled:opacity-60">{busy ? <BusyLabel>Reserving your order...</BusyLabel> : "Place order"}</button>
         </fieldset>
       </form>}
       {message && <Notice kind="error">{message}</Notice>}
@@ -129,6 +134,8 @@ export default function Home() {
         <ul className="mt-3 space-y-2 text-sm">{receipt.allocations.map(a => <li key={`${a.tripId}-${a.productId}`}><strong>{a.quantity} x {a.productName}</strong> on {a.tripId}. Train arrival: {a.arrival.replace("T", " ")} (Sri Lanka time).</li>)}</ul>
         <button type="button" onClick={() => router.push("/orders")} className="mt-4 text-sm font-semibold text-green-900 underline">View order history</button>
       </section>}
+    </div></Reveal>
     </div>
+    {cartCount > 0 && !receipt && <button type="button" className="cart-bar" onClick={() => document.getElementById("checkout")?.scrollIntoView({ behavior: "smooth" })}><span className="cart-count" key={cartCount}>{cartCount}</span><span>{cartCount === 1 ? "item" : "items"} · <CountUp prefix="Rs. " value={total} decimals={2} /></span><b>Checkout →</b></button>}
   </main>;
 }

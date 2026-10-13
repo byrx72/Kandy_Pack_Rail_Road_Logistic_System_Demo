@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LoadingState, Notice } from "../components/Feedback";
+import CinematicScene from "../components/CinematicScene";
 import { readJson, errorText } from "../lib/api-response";
 
 interface Order {
@@ -54,7 +55,7 @@ export default function OrderHistory() {
   }, [router, loadAttempt]);
 
   return (
-    <div className="workspace-shell">
+    <div className="workspace-shell cine-host"><CinematicScene variant="banner" />
       <div className="workspace-panel">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-slate-800">Order History</h1>

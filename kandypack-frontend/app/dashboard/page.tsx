@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { BusyLabel, LoadingState, Notice, type NoticeMessage } from "../components/Feedback";
 import CancelOrderDialog from "../components/CancelOrderDialog";
+import CinematicScene from "../components/CinematicScene";
 import { readJson, errorText } from "../lib/api-response";
 
 interface Order {
@@ -140,7 +141,7 @@ export default function Dashboard() {
     ? [["Active deliveries", orders.filter(o => activeStatuses.includes(o.status)).length, "active"], ["Awaiting scheduling", orders.filter(o => o.status === "placed").length, "placed"], ["Ready for dispatch", orders.filter(o => o.status === "scheduled").length, "scheduled"], ["On the way", orders.filter(o => o.status === "dispatched").length, "dispatched"]]
     : [["All orders", orders.length, "all"], ["Active orders", orders.filter(o => activeStatuses.includes(o.status)).length, "active"], ["Delivered", orders.filter(o => o.status === "delivered").length, "delivered"], ["Cancelled", orders.filter(o => o.status === "cancelled").length, "cancelled"]];
   return (
-    <div className="workspace-shell">
+    <div className="workspace-shell cine-host"><CinematicScene variant="banner" />
       <div className="workspace-panel">
         <div className="section-heading">
           <div>
@@ -161,7 +162,7 @@ export default function Dashboard() {
           </button>}
         </div>
 
-        <div className="stats-grid">{cards.map(([label, value, status]) => <button type="button" style={{textAlign:"left", borderColor: filter === status ? "#b51f46" : undefined}} className="stat-card" disabled={loading || !!loadError} key={label} aria-pressed={filter === status} onClick={() => setFilter(status)}><span>{label}</span><strong>{loading || loadError ? "—" : value}</strong></button>)}</div>
+        <div className="stats-grid">{cards.map(([label, value, status]) => <button type="button" style={{textAlign:"left", borderColor: filter === status ? "#2563eb" : undefined}} className="stat-card" disabled={loading || !!loadError} key={label} aria-pressed={filter === status} onClick={() => setFilter(status)}><span>{label}</span><strong>{loading || loadError ? "—" : value}</strong></button>)}</div>
         {!loading && !loadError && !isDispatcher && role === "ADMIN" && <p className="mb-5 text-sm text-slate-600">Delivered order value: <strong>Rs. {orders.filter(o => o.status === "delivered").reduce((sum, o) => sum + Number(o.amount), 0).toLocaleString("en-LK", {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong> · CSV includes all orders, regardless of the current filter.</p>}
         <div className="table-tools"><input aria-label="Search orders" type="search" placeholder="Search order ID or customer" value={search} onChange={e => setSearch(e.target.value)} /><select aria-label="Filter order status" value={filter} onChange={e => setFilter(e.target.value)}>{["all", "active", "placed", "scheduled", "dispatched", "delivered", "cancelled"].map(s => <option value={s} key={s}>{s === "all" ? "All statuses" : s === "active" ? "Active orders" : s}</option>)}</select></div>
         {loading && <LoadingState>Loading orders...</LoadingState>}
@@ -218,7 +219,7 @@ export default function Dashboard() {
                             e.target.value = "";
                           }
                         }}
-                        className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#a91d40]"
+                        className="border border-slate-300 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-[#1d4ed8]"
                       >
                         <option value="">{pending === o.orderId ? "Updating..." : "Change status..."}</option>
                         {(o.status === "placed" ? ["scheduled", "cancelled"] :

@@ -1,5 +1,6 @@
 "use client";
 import Brand from "../components/Brand";
+import CinematicScene from "../components/CinematicScene";
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -54,7 +55,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="auth-shell">
+    <div className="auth-shell cine-host"><CinematicScene variant="ambient" />
       <div className="auth-panel">
         <div className="mb-6 text-center">
           <div className="auth-brand"><Brand /></div><h1 className="auth-title">Create your account</h1>
@@ -75,7 +76,7 @@ export default function Signup() {
               onChange={(e) => setCustomerName(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
 
@@ -90,7 +91,7 @@ export default function Signup() {
               onChange={(e) => setDeliveryAddress(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
 
@@ -104,7 +105,7 @@ export default function Signup() {
               onChange={(e) => setCityId(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             >
               <option value="">Select a city</option>
               {cities.map((c) => (
@@ -126,7 +127,7 @@ export default function Signup() {
               onChange={(e) => setPhoneNumber(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
 
@@ -141,7 +142,7 @@ export default function Signup() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
 
@@ -156,14 +157,14 @@ export default function Signup() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
 
           <button
             type="submit"
             disabled={busy}
-            className="bg-[#a91d40] text-white font-medium rounded-lg px-4 py-2.5 mt-2 hover:bg-[#891735] transition"
+            className="bg-[#1d4ed8] text-white font-medium rounded-lg px-4 py-2.5 mt-2 hover:bg-[#1e40af] transition"
           >
             {busy ? <BusyLabel>Creating account...</BusyLabel> : "Sign Up"}
           </button>

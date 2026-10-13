@@ -1,12 +1,16 @@
 "use client";
 
 import Brand from "../components/Brand";
+import CinematicScene from "../components/CinematicScene";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BusyLabel, Notice, type NoticeMessage } from "../components/Feedback";
 import { readJson, errorText } from "../lib/api-response";
 
+const DEMO_LOGIN = process.env.NEXT_PUBLIC_DEMO_LOGIN ? process.env.NEXT_PUBLIC_DEMO_LOGIN === "true" : process.env.NODE_ENV !== "production";
+
 export default function Login() {
+  const [demoRole, setDemoRole] = useState("CUSTOMER");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notice, setNotice] = useState<NoticeMessage | null>(null);
@@ -19,6 +23,16 @@ export default function Login() {
     if (submitting.current) return;
     submitting.current = true;
     setBusy(true);
+    if (DEMO_LOGIN) {
+      // UI preview only: no credentials are checked and no backend session exists.
+      localStorage.setItem("token", "demo-token");
+      localStorage.setItem("customerId", "DEMO");
+      localStorage.setItem("role", demoRole);
+      localStorage.setItem("demoEmail", email);
+      setNotice({ kind: "success", text: "Demo sign-in successful. Opening the app..." });
+      router.push(demoRole === "CUSTOMER" ? "/" : "/dashboard");
+      return;
+    }
     setNotice({ kind: "info", text: "Signing in. Please wait..." });
     try {
       const response = await fetch("http://localhost:8081/api/auth/login", {
@@ -41,7 +55,7 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-shell">
+    <div className="auth-shell cine-host"><CinematicScene variant="ambient" />
       <div className="auth-panel">
         <div className="mb-6 text-center">
           <div className="auth-brand"><Brand /></div><h1 className="auth-title">Welcome back</h1>
@@ -62,7 +76,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
 
@@ -75,16 +89,24 @@ export default function Login() {
               id="login-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              required={!DEMO_LOGIN}
               disabled={busy}
-              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#a91d40] focus:border-transparent transition"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d4ed8] focus:border-transparent transition"
             />
           </div>
+
+          {DEMO_LOGIN && <div>
+            <span className="block text-sm font-medium text-slate-700 mb-1.5">Preview as</span>
+            <div className="role-toggle" role="radiogroup" aria-label="Preview role">
+              {[["CUSTOMER", "Customer"], ["ADMIN", "Admin"], ["DISPATCHER", "Dispatcher"], ["DRIVER", "Driver"]].map(([value, label]) => <button key={value} type="button" role="radio" aria-checked={demoRole === value} className={demoRole === value ? "on" : ""} onClick={() => setDemoRole(value)}>{label}</button>)}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Demo mode: any email works and the password is ignored. Data from the backend needs a real account.</p>
+          </div>}
 
           <button
             type="submit"
             disabled={busy}
-            className="bg-[#a91d40] text-white font-medium rounded-lg px-4 py-2.5 mt-2 hover:bg-[#891735] transition"
+            className="bg-[#1d4ed8] text-white font-medium rounded-lg px-4 py-2.5 mt-2 hover:bg-[#1e40af] transition"
           >
             {busy ? <BusyLabel>Signing in...</BusyLabel> : "Log In"}
           </button>
@@ -94,7 +116,7 @@ export default function Login() {
 
         <p className="mt-5 text-sm text-center text-slate-500">
           Don&apos;t have an account?{" "}
-          <a href="/signup" className="font-medium text-[#a91d40] hover:underline">
+          <a href="/signup" className="font-medium text-[#1d4ed8] hover:underline">
             Sign up
           </a>
         </p>
